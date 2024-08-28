@@ -1,0 +1,44 @@
+version: '3.8'
+
+networks:
+  mynet:
+
+services:
+  nginx:
+    image: nginx:stable-alpine3.20
+    container_name: nginx
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx:/etc/nginx:ro
+      - /etc/ssl:/etc/ssl:ro
+      - /var/www/html:/var/www/html/2048
+    restart: unless-stopped
+    ports:
+      - "80:80/tcp"
+  xray:
+    image: teddysun/xray:latest
+    container_name: xray
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    ports:
+      - "443:443/tcp"
+      - "443:443/udp"        
+    volumes:
+      - ./config:/etc/xray
+      - ./logs:/var/log/xray
+    environment:
+      - TZ=Etc/UTC
+    command: ["/usr/bin/xray", "-config", "/etc/xray/config.json"]
+    depends_on:
+      nginx:
+        condition: service_started
+        restart: true        
+volumes:
+  config:
+  logs:

@@ -1,0 +1,39 @@
+# Default server configuration
+#
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        return 301 https://$host$request_uri;
+}
+
+server {
+
+	# SSL configuration
+	#
+	listen 443 ssl default_server;
+	listen [::]:443 ssl default_server;
+
+    # Web site content
+	#
+	root /var/www/html;
+	index index.html;
+
+    # Server FQDN
+	#
+	server_name example.com www.example.com;
+
+    # Path to SSL certificate and private key files
+	#
+	ssl_certificate               /etc/ssl/certs/fullchain2.pem;
+	ssl_certificate_key           /etc/ssl/private/privkey2.pem;
+	
+	# URI
+	#
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+	}
+
+}
